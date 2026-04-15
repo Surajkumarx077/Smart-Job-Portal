@@ -25,7 +25,7 @@ CREATE DATABASE IF NOT EXISTS smart_job_portal;
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/smart_job_portal?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
 spring.datasource.username=root
-spring.datasource.password=Suraj321.S
+spring.datasource.password=root
 ```
 
 3. Start backend:
