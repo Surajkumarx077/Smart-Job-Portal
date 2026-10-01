@@ -3,6 +3,9 @@ package com.smartjobportal.service;
 import com.smartjobportal.entity.ParsedResume;
 import com.smartjobportal.entity.User;
 import com.smartjobportal.repository.ParsedResumeRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smartjobportal.dto.resume.ResumeAiInsights;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -35,9 +38,15 @@ public class ResumeParserService {
     );
 
     private final ParsedResumeRepository parsedResumeRepository;
+    private final GeminiScreeningService geminiScreeningService;
+    private final ObjectMapper objectMapper;
 
-    public ResumeParserService(ParsedResumeRepository parsedResumeRepository) {
+    public ResumeParserService(ParsedResumeRepository parsedResumeRepository,
+                               GeminiScreeningService geminiScreeningService,
+                               ObjectMapper objectMapper) {
         this.parsedResumeRepository = parsedResumeRepository;
+        this.geminiScreeningService = geminiScreeningService;
+        this.objectMapper = objectMapper;
     }
 
     public ParsedResume parseAndSave(byte[] pdfBytes, User user) throws IOException {
@@ -48,6 +57,7 @@ public class ResumeParserService {
         parsed.setSkills(extractSkills(rawText));
         parsed.setExperienceSummary(extractExperienceSection(rawText));
         parsed.setEducation(extractEducationSection(rawText));
+        saveAiInsights(parsed, rawText);
 
         parsedResumeRepository.findByUser(user).ifPresent(parsedResumeRepository::delete);
         return parsedResumeRepository.save(parsed);
@@ -117,5 +127,20 @@ public class ResumeParserService {
                         (pr.getExperienceSummary() != null ? pr.getExperienceSummary() : "") + " " +
                         (pr.getEducation() != null ? pr.getEducation() : ""))
                 .orElse("");
+    }
+
+    private void saveAiInsights(ParsedResume parsed, String rawText) {
+        ResumeAiInsights insights = geminiScreeningService.analyzeResume(rawText);
+        if (insights == null) {
+            return;
+        }
+        parsed.setAiSummary(insights.getSummary());
+        try {
+            parsed.setAiStrengths(objectMapper.writeValueAsString(insights.getStrengths()));
+            parsed.setAiRecommendations(objectMapper.writeValueAsString(insights.getRecommendations()));
+        } catch (JsonProcessingException ignored) {
+            parsed.setAiStrengths(null);
+            parsed.setAiRecommendations(null);
+        }
     }
 }

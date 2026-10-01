@@ -26,6 +26,15 @@ public class ParsedResume {
     @Column(name = "education", columnDefinition = "TEXT")
     private String education;
 
+    @Column(name = "ai_summary", columnDefinition = "TEXT")
+    private String aiSummary;
+
+    @Column(name = "ai_strengths", columnDefinition = "TEXT")
+    private String aiStrengths;
+
+    @Column(name = "ai_recommendations", columnDefinition = "TEXT")
+    private String aiRecommendations;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public User getUser() { return user; }
@@ -38,4 +47,10 @@ public class ParsedResume {
     public void setExperienceSummary(String experienceSummary) { this.experienceSummary = experienceSummary; }
     public String getEducation() { return education; }
     public void setEducation(String education) { this.education = education; }
+    public String getAiSummary() { return aiSummary; }
+    public void setAiSummary(String aiSummary) { this.aiSummary = aiSummary; }
+    public String getAiStrengths() { return aiStrengths; }
+    public void setAiStrengths(String aiStrengths) { this.aiStrengths = aiStrengths; }
+    public String getAiRecommendations() { return aiRecommendations; }
+    public void setAiRecommendations(String aiRecommendations) { this.aiRecommendations = aiRecommendations; }
 }

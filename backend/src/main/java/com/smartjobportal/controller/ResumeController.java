@@ -1,5 +1,8 @@
 package com.smartjobportal.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartjobportal.dto.resume.ParsedResumeResponse;
 import com.smartjobportal.security.UserPrincipal;
 import com.smartjobportal.service.ResumeParserService;
@@ -9,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -17,10 +21,14 @@ public class ResumeController {
 
     private final ResumeService resumeService;
     private final ResumeParserService resumeParserService;
+    private final ObjectMapper objectMapper;
 
-    public ResumeController(ResumeService resumeService, ResumeParserService resumeParserService) {
+    public ResumeController(ResumeService resumeService,
+                            ResumeParserService resumeParserService,
+                            ObjectMapper objectMapper) {
         this.resumeService = resumeService;
         this.resumeParserService = resumeParserService;
+        this.objectMapper = objectMapper;
     }
 
     @PostMapping("/upload")
@@ -47,8 +55,22 @@ public class ResumeController {
                     resp.setSkills(parsed.getSkills());
                     resp.setExperienceSummary(parsed.getExperienceSummary());
                     resp.setEducation(parsed.getEducation());
+                    resp.setAiSummary(parsed.getAiSummary());
+                    resp.setAiStrengths(parseList(parsed.getAiStrengths()));
+                    resp.setAiRecommendations(parseList(parsed.getAiRecommendations()));
                     return ResponseEntity.ok(resp);
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    private List<String> parseList(String value) {
+        if (value == null || value.isBlank()) {
+            return List.of();
+        }
+        try {
+            return objectMapper.readValue(value, new TypeReference<List<String>>() {});
+        } catch (JsonProcessingException exception) {
+            return List.of();
+        }
     }
 }

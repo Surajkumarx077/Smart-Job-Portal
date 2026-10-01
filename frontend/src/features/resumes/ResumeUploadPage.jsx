@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { resumesApi } from '../../api/resumes.api';
 import '../applications/StudentViews.css';
-import { UploadCloud, CheckCircle, FileText, Code, GraduationCap, Briefcase } from 'lucide-react';
+import { UploadCloud, CheckCircle, FileText, Code, GraduationCap, Briefcase, Sparkles, ListChecks, Lightbulb } from 'lucide-react';
 
 export default function ResumeUploadPage() {
   const [resumeUrl, setResumeUrl] = useState(null);
@@ -24,7 +24,7 @@ export default function ResumeUploadPage() {
         try {
            const parsed = await resumesApi.getParsedResume();
            setParsedData(parsed);
-        } catch (e) {
+        } catch {
            // Parsing might fail or return 404, ignore and just show the URL
         }
       }
@@ -46,7 +46,7 @@ export default function ResumeUploadPage() {
       await resumesApi.uploadResume(file);
       await fetchResumeInfo();
       setFile(null);
-    } catch (err) {
+    } catch {
       setError('Failed to upload resume. Ensure it is a valid PDF.');
     } finally {
       setLoading(false);
@@ -92,7 +92,7 @@ export default function ResumeUploadPage() {
 
              {parsedData && (
                 <div className="parsed-data-section">
-                  <h4 style={{ marginTop: '2.5rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>AI Extracted Insights</h4>
+                  <h4 style={{ marginTop: '2.5rem', marginBottom: '1rem', color: 'var(--color-primary)' }}>Resume Insights</h4>
                   
                   <div className="insight-item">
                     <h5><Code size={16}/> Skills</h5>
@@ -108,6 +108,27 @@ export default function ResumeUploadPage() {
                     <h5><GraduationCap size={16}/> Education</h5>
                     <p>{parsedData.education || 'Not detected'}</p>
                   </div>
+
+                  {parsedData.aiSummary ? (
+                    <>
+                      <div className="insight-item">
+                        <h5><Sparkles size={16}/> Gemini profile summary</h5>
+                        <p>{parsedData.aiSummary}</p>
+                      </div>
+                      <div className="insight-item">
+                        <h5><ListChecks size={16}/> Screening strengths</h5>
+                        <p>{parsedData.aiStrengths?.length ? parsedData.aiStrengths.join(', ') : 'Not available'}</p>
+                      </div>
+                      <div className="insight-item">
+                        <h5><Lightbulb size={16}/> Improvement recommendations</h5>
+                        <p>{parsedData.aiRecommendations?.length ? parsedData.aiRecommendations.join(' | ') : 'Not available'}</p>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-muted" style={{ fontSize: '0.9rem' }}>
+                      Gemini screening is unavailable for this upload, so the sections above use local PDF extraction.
+                    </p>
+                  )}
                 </div>
              )}
           </div>

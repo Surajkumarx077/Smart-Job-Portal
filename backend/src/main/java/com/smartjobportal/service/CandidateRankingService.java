@@ -29,16 +29,16 @@ public class CandidateRankingService {
     private final JobApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
     private final ResumeParserService resumeParserService;
-    private final AiScreeningService aiScreeningService;
+    private final GeminiScreeningService geminiScreeningService;
 
     public CandidateRankingService(JobApplicationRepository applicationRepository,
                                   JobRepository jobRepository,
                                   ResumeParserService resumeParserService,
-                                  AiScreeningService aiScreeningService) {
+                                  GeminiScreeningService geminiScreeningService) {
         this.applicationRepository = applicationRepository;
         this.jobRepository = jobRepository;
         this.resumeParserService = resumeParserService;
-        this.aiScreeningService = aiScreeningService;
+        this.geminiScreeningService = geminiScreeningService;
     }
 
     public List<RankedCandidateResponse> getRankedCandidates(Long jobId, Long recruiterId) {
@@ -59,8 +59,8 @@ public class CandidateRankingService {
             double score;
             List<String> matchedSkills;
 
-            if (aiScreeningService.isAvailable()) {
-                var aiResponse = aiScreeningService.getScore(jobText, resumeText);
+            if (geminiScreeningService.isAvailable()) {
+                var aiResponse = geminiScreeningService.getScore(jobText, resumeText);
                 if (aiResponse != null) {
                     score = aiResponse.getScore();
                     matchedSkills = aiResponse.getMatchedSkills() != null ? aiResponse.getMatchedSkills() : List.of();
