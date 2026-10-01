@@ -1,17 +1,9 @@
-# Local development environment
-.venv/
 .env
 .env.*
 
 # IDE settings
 .idea/
 .vscode/
-
-# Python caches and test artifacts
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.mypy_cache/
 
 # Frontend dependencies and build output
 frontend/node_modules/
